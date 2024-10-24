@@ -1,0 +1,76 @@
+<section id="collection-request">
+    <h2>Submit a Collection Request</h2>
+    <form id="collection-form">
+        <input type="text" id="user-name" placeholder="Your Name" required />
+        <input type="text" id="user-address" placeholder="Your Address" required />
+        <input type="text" id="waste-type" placeholder="Type of Waste" required />
+        <input type="text" id="contact-number" placeholder="Contact Number" required />
+        <textarea id="additional-notes" placeholder="Additional Notes"></textarea>
+        <button type="submit">Submit Request</button>
+    </form>
+    <div id="submission-result"></div>
+</section>
+
+<div id="popup" style="display:none;">
+    <span id="close" onclick="cln()">close</span>
+    <h2>Thank you for contacting us!</h2>
+    <p style="text-align: center;">We will be in touch soon.</p>
+    <p style="text-align: center;" id="request-id-display"></p>
+</div>
+
+<script>
+    // Firebase setup
+    import { initializeApp } from "firebase/app";
+    import { getFirestore, collection, addDoc } from "firebase/firestore"; // Updated imports
+
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID",
+        measurementId: "YOUR_MEASUREMENT_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Initialize Firestore
+
+    document.getElementById('collection-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('user-name').value;
+        const address = document.getElementById('user-address').value;
+        const wasteType = document.getElementById('waste-type').value;
+        const contactNumber = document.getElementById('contact-number').value;
+        const notes = document.getElementById('additional-notes').value;
+
+        submitCollectionRequest(name, address, wasteType, contactNumber, notes);
+    });
+
+    async function submitCollectionRequest(name, address, wasteType, contactNumber, notes) {
+        const requestData = {
+            name,
+            address,
+            wasteType,
+            contactNumber,
+            notes,
+            status: "Pending",
+            createdAt: new Date()
+        };
+
+        console.log("Adding document to Firestore:", requestData); // Debugging line
+
+        try {
+            const docRef = await addDoc(collection(db, "collectionRequests"), requestData);
+            document.getElementById('request-id-display').innerHTML = `Your Request ID: ${docRef.id}`;
+            document.getElementById('popup').style.display = 'block'; // Show the popup
+        } catch (error) {
+            document.getElementById('submission-result').innerHTML = "Error submitting request: " + error.message;
+        }
+    }
+
+    function cln() {
+        document.getElementById('popup').style.display = 'none'; // Hide the popup
+    }
+</script>

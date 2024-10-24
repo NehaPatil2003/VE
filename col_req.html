@@ -1,0 +1,56 @@
+<section id="collection-request">
+    <h2>Submit a Collection Request</h2>
+    <form id="collection-form">
+      <!-- Form fields -->
+      <button type="submit">Submit Request</button>
+    </form>
+    <div id="submission-result"></div>
+  </section>
+  
+  <div id="popup" style="display:none;"> <!-- Set display to none initially -->
+      <span id="close" onclick="cln()">close</span>
+      <h2>Thank you for contacting us!</h2>
+      <p style="text-align: center;">We will be in touch soon.</p>
+      <p style="text-align: center;" id="request-id-display"></p> <!-- Placeholder for Request ID -->
+  </div>
+  
+  <script>
+    document.getElementById('collection-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+  
+      const name = document.getElementById('user-name').value;
+      const address = document.getElementById('user-address').value;
+      const wasteType = document.getElementById('waste-type').value;
+      const contactNumber = document.getElementById('contact-number').value;
+      const notes = document.getElementById('additional-notes').value;
+  
+      // Handle submission to the backend or database
+      submitCollectionRequest(name, address, wasteType, contactNumber, notes);
+    });
+  
+    async function submitCollectionRequest(name, address, wasteType, contactNumber, notes) {
+      const requestData = {
+        name,
+        address,
+        wasteType,
+        contactNumber,
+        notes,
+        status: "Pending",
+        createdAt: new Date()
+      };
+  
+      try {
+        const docRef = await addDoc(collection(db, "collectionRequests"), requestData);
+        // Show the popup and include the Request ID
+        document.getElementById('request-id-display').innerHTML = `Your Request ID: ${docRef.id}`;
+        document.getElementById('popup').style.display = 'block'; // Show the popup
+      } catch (error) {
+        document.getElementById('submission-result').innerHTML = "Error submitting request: " + error.message;
+      }
+    }
+  
+    function cln() {
+        document.getElementById('popup').style.display = 'none'; // Hide the popup
+    }
+  </script>
+  
